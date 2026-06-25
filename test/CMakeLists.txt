@@ -9,12 +9,13 @@ FetchContent_Declare(googletest
 FetchContent_MakeAvailable(googletest)
 
 add_executable(TestParser ParserTest.cpp)
+add_executable(TestCode CodeTest.cpp)
 
-
-
+target_link_libraries(TestCode PRIVATE Code GTest::gtest_main)
 target_link_libraries(TestParser PRIVATE Parser GTest::gtest_main)
 
 include(GoogleTest)
 
 gtest_discover_tests(TestParser)
+gtest_discover_tests(TestCode)
 
