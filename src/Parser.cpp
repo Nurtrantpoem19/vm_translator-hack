@@ -2,7 +2,16 @@
 #include <string>
 #include <unordered_map>
 
-Parser::Parser(std::filesystem::path &input) : reader(input), currentCommand("")
+Parser::Parser(std::filesystem::path &input)
+    : reader(input), currentCommand(""),
+      lookup{{"push", CommandType::C_Push},
+             {"pop", CommandType::C_Pop},
+             {"label", CommandType::C_Label},
+             {"goto", CommandType::C_Goto},
+             {"function", CommandType::C_Function},
+             {"return", CommandType::C_Return},
+             {"constant", CommandType::C_Call}}
+
 {
 }
 
@@ -51,14 +60,6 @@ int Parser::arg2() { return std::stoi(currentCommand.substr(secondSpace + 1)); }
 
 Parser::CommandType Parser::commandType()
 {
-    static const std::unordered_map<std::string, CommandType> lookup = {
-        {"push", CommandType::C_Push},
-        {"pop", CommandType::C_Pop},
-        {"label", CommandType::C_Label},
-        {"goto", CommandType::C_Goto},
-        {"function", CommandType::C_Function},
-        {"return", CommandType::C_Return},
-        {"constant", CommandType::C_Call}};
     auto it = lookup.find(currentCommand.substr(0, firstSpace));
     if (it != lookup.end())
     {
