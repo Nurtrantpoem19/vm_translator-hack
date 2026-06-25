@@ -1,6 +1,9 @@
+#ifndef PARSER_HPP
+#define PARSER_HPP
+
 #include <filesystem>
 #include <fstream>
-
+#include <unordered_map>
 class Parser
 {
   private:
@@ -10,8 +13,6 @@ class Parser
     std::size_t secondSpace;
 
   public:
-    Parser(std::filesystem::path &input);
-    bool advance();
     enum class CommandType
     {
         C_Arithmetic,
@@ -23,7 +24,13 @@ class Parser
         C_Return,
         C_Call
     };
+
+    Parser(std::filesystem::path &input);
+    std::unordered_map<std::string, CommandType> lookup;
+    bool advance();
     CommandType commandType();
     std::string arg1();
     int arg2();
 };
+
+#endif
