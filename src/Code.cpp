@@ -37,7 +37,14 @@ void Code::writeBinOp(const std::string &op)
     popToD();
     popToM();
 
-    output << "M=M" << op << "D\n";
+    if (op == "+" || (op == "&") || (op == "|"))
+    {
+        output << "M=D" << op << "M\n";
+    }
+    else
+    {
+        output << "M=M" << op << "D\n";
+    }
     output << "@SP\n";
     output << "M=M+1\n";
 }
@@ -73,7 +80,8 @@ void Code::writeCompLabel(const std::string &jump)
 Code::Code(const std::filesystem::path &outpath)
     : output(outpath), currentFileName(outpath.stem().string()),
       table{{"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"},
-            {"that", "THAT"}, {"pointer", ""},     {"constant", ""}},
+            {"that", "THAT"}, {"pointer", ""},     {"constant", ""},
+            {"temp", ""},     {"static", ""}},
       opTable{{"add", OpType::Add}, {"sub", OpType::Sub}, {"neg", OpType::Neg},
               {"eq", OpType::Eq},   {"gt", OpType::Gt},   {"lt", OpType::Lt},
               {"and", OpType::And}, {"or", OpType::Or},   {"not", OpType::Not}},
@@ -138,7 +146,7 @@ void Code::writeArithmetic(const std::string &command)
     }
 }
 
-void Code::writePushPop(Parser::CommandType command, std::string &segment,
+void Code::writePushPop(Parser::CommandType command, const std::string &segment,
                         int index)
 {
 
