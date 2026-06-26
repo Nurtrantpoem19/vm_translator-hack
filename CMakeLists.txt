@@ -8,8 +8,14 @@ enable_testing()
 
 add_library(Parser src/Parser.cpp)
 add_library(Code src/Code.cpp)
+add_executable(Main src/Translator.cpp)
 
+target_link_libraries(Main PRIVATE Code Parser)
+
+set_target_properties(Main PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 target_include_directories(Parser PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(Code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(Main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_subdirectory(test)
