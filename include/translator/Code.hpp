@@ -52,12 +52,8 @@ class Code
     Code(const std::filesystem::path &outpath);
 
     void writeArithmetic(const std::string &command);
-    void writePushPop(Parser::CommandType command, std::string &segment,
+    void writePushPop(Parser::CommandType command, const std::string &segment,
                       int index);
-    void writePush(std::string segment, int index);
-    // write helper methods for writepushpop because it's gonnoa be too hefty if
-    // i implement everyting inside writepushpop
-    void fetch(SegmentType type, int index);
     void close();
 };
 
