@@ -70,8 +70,7 @@ TEST_F(ParserTest, InlineCommentsAreStripped)
 //
 TEST_F(ParserTest, IdentifiesCorrectCommandTypes)
 {
-    std::string input =
-        "push\npop\nlabel\ngoto\nfunction\nreturn\nconstant\nadd\n";
+    std::string input = "push\npop\nlabel\ngoto\nfunction\nreturn\ncall\nadd\n";
     CreateTestFile(input);
     Parser parser(tempFile);
 
@@ -132,4 +131,114 @@ TEST_F(ParserTest, HandlesArithmeticArg1)
     parser.advance();
     EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Arithmetic);
     EXPECT_EQ(parser.arg1(), "add");
+}
+
+// --- Arithmetic / Logical Commands ---
+
+TEST_F(ParserTest, HandlesArithmeticSub)
+{
+    CreateTestFile("sub");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Arithmetic);
+    EXPECT_EQ(parser.arg1(), "sub");
+}
+
+TEST_F(ParserTest, HandlesArithmeticEq)
+{
+    CreateTestFile("eq");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Arithmetic);
+    EXPECT_EQ(parser.arg1(), "eq");
+}
+
+// --- Memory Segment Commands ---
+
+TEST_F(ParserTest, HandlesPushCommand)
+{
+    CreateTestFile("push constant 5");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Push);
+    EXPECT_EQ(parser.arg1(),
+              "constant"); // arg1 for push/pop is the segment name
+}
+
+TEST_F(ParserTest, HandlesPopCommand)
+{
+    CreateTestFile("pop local 2");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Pop);
+    EXPECT_EQ(parser.arg1(), "local");
+}
+
+// --- Program Flow Commands ---
+
+TEST_F(ParserTest, HandlesLabelCommand)
+{
+    CreateTestFile("label LOOP_START");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Label);
+    EXPECT_EQ(parser.arg1(), "LOOP_START");
+}
+
+TEST_F(ParserTest, HandlesGotoCommand)
+{
+    CreateTestFile("goto END_FUNCTION");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Goto);
+    EXPECT_EQ(parser.arg1(), "END_FUNCTION");
+}
+
+TEST_F(ParserTest, HandlesIfGotoCommand)
+{
+    CreateTestFile("if-goto COMPUTE_AGAIN");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_If);
+    EXPECT_EQ(parser.arg1(), "COMPUTE_AGAIN");
+}
+
+// --- Function and Call Commands ---
+
+TEST_F(ParserTest, HandlesFunctionCommand)
+{
+    CreateTestFile("function Main.fibonacci 2");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Function);
+    EXPECT_EQ(parser.arg1(), "Main.fibonacci");
+}
+
+TEST_F(ParserTest, HandlesCallCommand)
+{
+    CreateTestFile("call Sys.init 0");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Call);
+    EXPECT_EQ(parser.arg1(), "Sys.init");
+}
+
+TEST_F(ParserTest, HandlesReturnCommand)
+{
+    CreateTestFile("return");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Return);
+    // Note: Per Nand2Tetris spec, arg1() should not be called if commandType is
+    // C_Return.
 }
