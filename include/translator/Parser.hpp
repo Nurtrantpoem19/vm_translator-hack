@@ -22,6 +22,7 @@ class Parser
         C_Goto,
         C_Function,
         C_Return,
+        C_If,
         C_Call
     };
 
