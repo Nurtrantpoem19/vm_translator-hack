@@ -70,10 +70,23 @@ TEST_F(CodeTest, WriteArithmeticAdd)
                                    "D=M\n"
                                    "@SP\n"
                                    "AM=M-1\n"
-                                   "M=M+D\n"
+                                   "M=D+M\n"
                                    "@SP\n"
                                    "M=M+1\n";
 
     // 4. Compare actual output against theoretical output
+    EXPECT_EQ(getOutputFileContent(), expectedAssembly);
+}
+
+TEST_F(CodeTest, writeLabelsUnderFunctions)
+{
+    std::string segment = "label bar";
+
+    writer.writeLabel("bar", "foo");
+
+    writer.close();
+
+    std::string expectedAssembly = "(TestOutput.foo$bar)\n";
+
     EXPECT_EQ(getOutputFileContent(), expectedAssembly);
 }
