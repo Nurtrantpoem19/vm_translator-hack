@@ -48,6 +48,8 @@ class Code
     void writeUnOp(const std::string &op);
     void writeCompLabel(const std::string &jump);
 
+    void writeLabel(const std::string &label, const std::string &functionName);
+
   public:
     Code(const std::filesystem::path &outpath);
 

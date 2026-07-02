@@ -76,6 +76,11 @@ void Code::writeCompLabel(const std::string &jump)
 
     output << "(END_COMP" << labelCount << ")\n";
 }
+void Code::writeLabel(const std::string &label, const std::string &functionName)
+{
+    output << "(" << currentFileName << "." << functionName << "$" << label
+           << ")\n";
+}
 
 Code::Code(const std::filesystem::path &outpath)
     : output(outpath), currentFileName(outpath.stem().string()),

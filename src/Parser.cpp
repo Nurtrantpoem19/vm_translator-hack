@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 Parser::Parser(std::filesystem::path &input)
-    : reader(input), currentCommand(""),
+    : reader(input), currentCommand(""), currentFunction(""),
       lookup{{"push", CommandType::C_Push},
              {"pop", CommandType::C_Pop},
              {"label", CommandType::C_Label},
@@ -54,6 +54,12 @@ std::string Parser::arg1()
     {
         return currentCommand;
     }
+    if (commandType() == CommandType::C_Function)
+    {
+        currentFunction =
+            currentCommand.substr(firstSpace + 1, secondSpace - firstSpace - 1);
+        return currentFunction;
+    }
     return currentCommand.substr(firstSpace + 1, secondSpace - firstSpace - 1);
 }
 
@@ -65,6 +71,7 @@ Parser::CommandType Parser::commandType()
     auto it = lookup.find(currentCommand.substr(0, firstSpace));
     if (it != lookup.end())
     {
+
         return it->second;
     }
     return CommandType::C_Arithmetic;
