@@ -41,29 +41,28 @@ bool Parser::advance()
 
                 secondSpace = currentCommand.find(' ', firstSpace + 1);
 
+                if (commandType() == CommandType::C_Function)
+                {
+                    currentFunction = currentCommand.substr(
+                        firstSpace + 1, secondSpace - firstSpace - 1);
+                }
+
                 return true;
             }
         }
     }
     return false;
 }
-// should only be called if it's not C_Return
+
 std::string Parser::arg1()
 {
     if (commandType() == CommandType::C_Arithmetic)
     {
         return currentCommand;
     }
-    if (commandType() == CommandType::C_Function)
-    {
-        currentFunction =
-            currentCommand.substr(firstSpace + 1, secondSpace - firstSpace - 1);
-        return currentFunction;
-    }
     return currentCommand.substr(firstSpace + 1, secondSpace - firstSpace - 1);
 }
 
-// only for C_Pop, Push, Function and Call
 int Parser::arg2() { return std::stoi(currentCommand.substr(secondSpace + 1)); }
 
 Parser::CommandType Parser::commandType()
@@ -76,3 +75,5 @@ Parser::CommandType Parser::commandType()
     }
     return CommandType::C_Arithmetic;
 }
+
+std::string Parser::getFunctionName() { return currentFunction; }

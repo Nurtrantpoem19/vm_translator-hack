@@ -33,7 +33,7 @@ class Parser
     CommandType commandType();
     std::string arg1();
     int arg2();
-    static std::string getFunctionName();
+    std::string getFunctionName();
 };
 
 #endif
