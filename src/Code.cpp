@@ -82,6 +82,21 @@ void Code::writeLabel(const std::string &label, const std::string &functionName)
            << ")\n";
 }
 
+void Code::writeGoTo(const std::string &label, const std::string &functionName)
+{
+    output << "@" << currentFileName << "." << functionName << "$" << label
+           << "\n";
+    output << "0;JMP\n";
+}
+
+void Code::writeIf(const std::string &label, const std::string &functionName)
+{
+    popToD();
+    output << "@" << currentFileName << "." << functionName << "$" << label
+           << "\n";
+    output << "D;JLT\n";
+}
+
 Code::Code(const std::filesystem::path &outpath)
     : output(outpath), currentFileName(outpath.stem().string()),
       table{{"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"},

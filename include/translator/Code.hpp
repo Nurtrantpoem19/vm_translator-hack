@@ -50,8 +50,9 @@ class Code
 
   public:
     Code(const std::filesystem::path &outpath);
-
+    void writeGoTo(const std::string &label, const std ::string &functionName);
     void writeLabel(const std::string &label, const std::string &functionName);
+    void writeIf(const std::string &label, const std::string &functionName);
     void writeArithmetic(const std::string &command);
     void writePushPop(Parser::CommandType command, const std::string &segment,
                       int index);

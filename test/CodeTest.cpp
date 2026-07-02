@@ -90,3 +90,22 @@ TEST_F(CodeTest, writeLabelsUnderFunctions)
 
     EXPECT_EQ(getOutputFileContent(), expectedAssembly);
 }
+
+TEST_F(CodeTest, writeGoTo_IfGOTO)
+{
+    writer.writeGoTo("bar", "foo");
+
+    writer.writeIf("bar", "foo");
+
+    writer.close();
+    std::string expectedAssembly = "@TestOutput.foo$bar\n"
+                                   "0;JMP\n"
+                                   "@SP\n"
+                                   "AM=M-1\n"
+                                   "D=M\n"
+                                   "@TestOutput.foo$bar\n"
+                                   "D;JLT\n";
+
+    // Read the file and assert
+    EXPECT_EQ(getOutputFileContent(), expectedAssembly);
+}
