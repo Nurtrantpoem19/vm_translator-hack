@@ -2,7 +2,7 @@
 #include <string>
 #include <unordered_map>
 
-Parser::Parser(std::filesystem::path &input)
+Parser::Parser(const std::filesystem::path &input)
     : reader(input), currentCommand(""), currentFunction(""),
       lookup{{"push", CommandType::C_Push},
              {"pop", CommandType::C_Pop},

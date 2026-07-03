@@ -27,7 +27,7 @@ class Parser
         C_Call
     };
 
-    Parser(std::filesystem::path &input);
+    Parser(const std::filesystem::path &input);
     std::unordered_map<std::string, CommandType> lookup;
     bool advance();
     CommandType commandType();
