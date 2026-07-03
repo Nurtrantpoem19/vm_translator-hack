@@ -11,6 +11,7 @@ class Code
 {
   private:
     std::string currentFileName;
+    int ret_add;
     enum class OpType
     {
         Add,
@@ -53,9 +54,15 @@ class Code
     void writeGoTo(const std::string &label, const std ::string &functionName);
     void writeLabel(const std::string &label, const std::string &functionName);
     void writeIf(const std::string &label, const std::string &functionName);
+    void writeFunction(const std::string &functionName, int nVariables);
+    void writeCall(const std::string &functionName, const int &nArgs);
+    void writeReturn();
+
     void writeArithmetic(const std::string &command);
     void writePushPop(Parser::CommandType command, const std::string &segment,
                       int index);
+    void updateFileName(const std::string &fileName);
+    void init();
     void close();
 };
 

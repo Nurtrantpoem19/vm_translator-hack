@@ -39,6 +39,7 @@ TEST_F(CodeTest, PushConstantSeven)
     // 1. Generate the assembly
     std::string seg = "constant";
 
+    writer.updateFileName("TestOutput");
     writer.writePushPop(Parser::CommandType::C_Push, seg, 7);
     writer.close();
     // 2. Define the theoretical output
@@ -61,6 +62,7 @@ TEST_F(CodeTest, PushConstantSeven)
 TEST_F(CodeTest, WriteArithmeticAdd)
 {
     // 1. Generate the assembly for an "add" operation
+    writer.updateFileName("TestOutput");
     writer.writeArithmetic("add");
 
     // 2. Close the file so the contents flush to disk
@@ -81,6 +83,7 @@ TEST_F(CodeTest, WriteArithmeticAdd)
 TEST_F(CodeTest, writeLabelsUnderFunctions)
 {
     std::string segment = "label bar";
+    writer.updateFileName("TestOutput");
 
     writer.writeLabel("bar", "foo");
 
@@ -93,6 +96,7 @@ TEST_F(CodeTest, writeLabelsUnderFunctions)
 
 TEST_F(CodeTest, writeGoTo_IfGOTO)
 {
+    writer.updateFileName("TestOutput");
     writer.writeGoTo("bar", "foo");
 
     writer.writeIf("bar", "foo");
@@ -108,4 +112,48 @@ TEST_F(CodeTest, writeGoTo_IfGOTO)
 
     // Read the file and assert
     EXPECT_EQ(getOutputFileContent(), expectedAssembly);
+}
+
+TEST_F(CodeTest, writeFunctionTest)
+{
+    //
+    // writer.writeFunction("foo", 2);
+    // writer.close();
+    //
+    // std::cout << "\n--- Generated Assembly Output ---\n"
+    //           << getOutputFileContent()
+    //           << "---------------------------------\n";
+}
+
+TEST_F(CodeTest, writeCallTest)
+{
+
+    writer.writeCall("bar", 2);
+    writer.close();
+
+    std::cout << "\n--- Generated Assembly Output ---\n"
+              << getOutputFileContent()
+              << "---------------------------------\n";
+}
+TEST_F(CodeTest, writeSysCallTest)
+{
+
+    writer.writeCall("Sys.init", 0);
+    writer.close();
+
+    std::cout << "\n--- Generated Assembly Output ---\n"
+              << getOutputFileContent()
+              << "---------------------------------\n";
+}
+
+TEST_F(CodeTest, writeFullTest)
+{
+    writer.init();
+    writer.writeCall("Foo", 2);
+    writer.writeReturn();
+    writer.close();
+
+    std::cout << "\n--- Generated Assembly Output ---\n"
+              << getOutputFileContent()
+              << "---------------------------------\n";
 }

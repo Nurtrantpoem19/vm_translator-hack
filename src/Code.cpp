@@ -97,8 +97,148 @@ void Code::writeIf(const std::string &label, const std::string &functionName)
     output << "D;JLT\n";
 }
 
+void Code::writeFunction(const std::string &functionName, int nVariables)
+{
+    output << "(" << currentFileName << "." << functionName << ")\n";
+
+    for (int i = 0; i < nVariables; i++)
+    {
+        writePushPop(Parser::CommandType::C_Push, "constant", 0);
+    }
+}
+
+void Code::writeCall(const std::string &functionName, const int &nArgs)
+{
+    std::string labelName;
+    std::string jumpTarget;
+
+    // 1. Determine the scopes
+    if (functionName.find('.') != std::string::npos)
+    {
+        // If the function name already has a dot (like "Sys.init" or
+        // "Math.multiply")
+        jumpTarget = functionName;
+        labelName = functionName + "$ret." + std::to_string(ret_add++);
+    }
+    else
+    {
+        // Standard call within the current file (like calling local function
+        // "foo")
+        jumpTarget = currentFileName + "." + functionName;
+        labelName = currentFileName + "." + functionName + "$ret." +
+                    std::to_string(ret_add++);
+    }
+    //---------save return address first
+    output << "@" << labelName << "\n"
+           << "D=A\n"
+           << "@SP\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "M=M+1\n";
+
+    output << "@LCL\n"
+           << "D=M\n"
+           << "@SP\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "M=M+1\n"
+           //------------- now for arg
+           << "@ARG\n"
+           << "D=M\n"
+           << "@SP\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "M=M+1\n"
+           //------------- now for this
+           << "@THIS\n"
+           << "D=M\n"
+           << "@SP\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "M=M+1\n"
+           //------------- and that
+           << "@THAT\n"
+           << "D=M\n"
+           << "@SP\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "M=M+1\n"
+           //--------------- now go back to before stack frame
+           << "@SP\n"
+           << "D=M\n"
+           << "@5\n"
+           << "D=D-A\n"
+           << "@" << nArgs << "\n"
+           << "D=D-M\n"
+           << "@ARG\n"
+           << "M=D\n"
+           << "@SP\n"
+           << "D=M\n"
+           << "@LCL\n"
+           << "M=D\n"
+           << "@" << jumpTarget << "\n"
+           << "0;JMP\n";
+
+    output << "(" << labelName << ")\n";
+}
+
+void Code::writeReturn()
+{
+
+    output << "@LCL\n"
+           << "D=M\n"
+           << "@R13\n"
+           << "M=D\n"
+
+           << "@5\n"
+           << "A=D-A\n"
+           << "D=M\n"
+           << "@R14\n"
+           << "M=D\n"
+
+           << "@SP\n"
+           << "A=M-1\n"
+           << "D=M\n"
+           << "@ARG\n"
+           << "A=M\n"
+           << "M=D\n"
+           << "@ARG\n"
+           << "D=M+1\n"
+           << "@SP\n"
+           << "M=D\n"
+
+           << "@R13\n"
+           << "AM=M-1\n"
+           << "D=M\n"
+           << "@THAT\n"
+           << "M=D\n"
+           << "@R13\n"
+           << "AM=M-1\n"
+           << "D=M\n"
+           << "@THIS\n"
+           << "M=D\n"
+           << "@R13\n"
+           << "AM=M-1\n"
+           << "D=M\n"
+           << "@ARG\n"
+           << "M=D\n"
+           << "@R13\n"
+           << "AM=M-1\n"
+           << "D=M\n"
+           << "@LCL\n"
+           << "M=D\n"
+           << "@R14\n"
+           << "A=M\n"
+           << "0;JMP\n";
+}
+
 Code::Code(const std::filesystem::path &outpath)
-    : output(outpath), currentFileName(outpath.stem().string()),
+    : output(outpath), currentFileName(""), ret_add(0),
       table{{"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"},
             {"that", "THAT"}, {"pointer", ""},     {"constant", ""},
             {"temp", ""},     {"static", ""}},
@@ -111,6 +251,11 @@ Code::Code(const std::filesystem::path &outpath)
           {"that", SegmentType::That},         {"temp", SegmentType::Temp},
           {"pointer", SegmentType::Pointer},   {"static", SegmentType::Static}}
 {
+}
+void Code::init()
+{
+    output << "@256\nD=A\n@SP\nM=D\n";
+    writeCall("Sys.init", 0);
 }
 
 void Code::writeArithmetic(const std::string &command)
@@ -258,6 +403,11 @@ void Code::writePushPop(Parser::CommandType command, const std::string &segment,
     }
 }
 
+void Code::updateFileName(const std::string &fileName)
+{
+    currentFileName = fileName;
+    return;
+}
 void Code::close()
 {
     if (output.is_open())
