@@ -27,34 +27,64 @@ int main(int argc, char *argv[])
     std::cout << "Translating: " << inPath.filename() << " -> "
               << outPath.filename() << "\n";
 
-    Parser reader(inPath);
     Code writer(outPath);
+    writer.init();
     int lineCount = 0;
-    while (reader.advance())
+    for (auto &it : std::filesystem::directory_iterator(inPath))
     {
-        ++lineCount;
-        Parser::CommandType type = reader.commandType();
+        Parser reader(it.path());
 
-        try
+        while (reader.advance())
         {
-            if (type == Parser::CommandType::C_Arithmetic)
+            ++lineCount;
+            Parser::CommandType type = reader.commandType();
+
+            try
             {
-                writer.writeArithmetic(reader.arg1());
+                if (type == Parser::CommandType::C_Arithmetic)
+                {
+                    writer.writeArithmetic(reader.arg1());
+                }
+                else if (type == Parser::CommandType::C_Pop ||
+                         type == Parser::CommandType::C_Push)
+                {
+                    writer.writePushPop(type, reader.arg1(), reader.arg2());
+                }
+                else if (type == Parser::CommandType::C_Function)
+                {
+                    writer.writeFunction(reader.arg1(), reader.arg2());
+                }
+                else if (type == Parser::CommandType::C_Call)
+                {
+                    writer.writeCall(reader.arg1(), reader.arg2());
+                }
+                else if (type == Parser::CommandType::C_Goto)
+                {
+                    writer.writeGoTo(reader.arg1(), reader.getFunctionName());
+                }
+                else if (type == Parser::CommandType::C_If)
+                {
+                    writer.writeIf(reader.arg1(), reader.getFunctionName());
+                }
+                else if (type == Parser::CommandType::C_Label)
+                {
+                    writer.writeLabel(reader.arg1(), reader.getFunctionName());
+                }
+                else if (type == Parser::CommandType::C_Return)
+                {
+                    writer.writeReturn();
+                }
             }
-            else if (type == Parser::CommandType::C_Pop ||
-                     type == Parser::CommandType::C_Push)
+            catch (const std::out_of_range &e)
             {
-                writer.writePushPop(type, reader.arg1(), reader.arg2());
+                std::cerr << "\n[!] Lookup Error on line " << lineCount << "!\n"
+                          << "    Command Type: " << static_cast<int>(type)
+                          << "\n"
+                          << "    arg1:        '" << reader.arg1() << "'\n"
+                          << "    arg2:        '" << reader.arg2() << "'\n"
+                          << "    Error Details: " << e.what() << "\n\n";
+                return 1; // Exit early so you can see the trace
             }
-        }
-        catch (const std::out_of_range &e)
-        {
-            std::cerr << "\n[!] Lookup Error on line " << lineCount << "!\n"
-                      << "    Command Type: " << static_cast<int>(type) << "\n"
-                      << "    arg1:        '" << reader.arg1() << "'\n"
-                      << "    arg2:        '" << reader.arg2() << "'\n"
-                      << "    Error Details: " << e.what() << "\n\n";
-            return 1; // Exit early so you can see the trace
         }
     }
 }
