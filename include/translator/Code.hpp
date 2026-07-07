@@ -12,6 +12,7 @@ class Code
   private:
     std::string currentFileName;
     std::string currentFunction;
+    std::string currentCallee;
     int ret_add;
     enum class OpType
     {
@@ -64,6 +65,7 @@ class Code
                       int index);
     void updateFileName(const std::string &fileName);
     void updateFunctionName(const std::string &functionName);
+    void updateCalleeName(const std::string &calleName);
     void init();
     void close();
 };

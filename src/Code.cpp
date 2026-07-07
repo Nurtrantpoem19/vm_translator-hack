@@ -112,7 +112,7 @@ void Code::writeCall(const int &nArgs)
     std::string labelName;
     std::string jumpTarget;
 
-    jumpTarget = currentFunction;
+    jumpTarget = currentCallee;
     labelName = currentFunction + "$ret." + std::to_string(ret_add++);
 
     //---------save return address first
@@ -161,7 +161,7 @@ void Code::writeCall(const int &nArgs)
            << "@5\n"
            << "D=D-A\n"
            << "@" << nArgs << "\n"
-           << "D=D-M\n"
+           << "D=D-A\n"
            << "@ARG\n"
            << "M=D\n"
            << "@SP\n"
@@ -225,7 +225,7 @@ void Code::writeReturn()
 }
 
 Code::Code(const std::filesystem::path &outpath)
-    : output(outpath), currentFileName(""), ret_add(0),
+    : output(outpath), currentCallee(""), currentFileName(""), ret_add(0),
       table{{"local", "LCL"}, {"argument", "ARG"}, {"this", "THIS"},
             {"that", "THAT"}, {"pointer", ""},     {"constant", ""},
             {"temp", ""},     {"static", ""}},
@@ -243,6 +243,7 @@ void Code::init()
 {
     output << "@256\nD=A\n@SP\nM=D\n";
     currentFunction = "Sys.init";
+    currentCallee = "Sys.init";
     writeCall(0);
 }
 
@@ -400,6 +401,11 @@ void Code::updateFileName(const std::string &fileName)
 void Code::updateFunctionName(const std::string &functionName)
 {
     currentFunction = functionName;
+    return;
+}
+void Code::updateCalleeName(const std::string &calleName)
+{
+    currentCallee = calleName;
     return;
 }
 void Code::close()
