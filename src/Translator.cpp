@@ -89,6 +89,7 @@ int main(int argc, char *argv[])
                 }
                 else if (type == Parser::CommandType::C_Call)
                 {
+                    writer.updateCalleeName(reader.arg1());
                     writer.writeCall(reader.arg2());
                 }
                 else if (type == Parser::CommandType::C_Goto)
