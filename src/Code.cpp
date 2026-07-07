@@ -94,7 +94,7 @@ void Code::writeIf(const std::string &label)
     popToD();
     output << "@" << currentFileName << "." << currentFunction << "$" << label
            << "\n";
-    output << "D;JLT\n";
+    output << "D;JNE\n";
 }
 
 void Code::writeFunction(int nVariables)
@@ -370,7 +370,7 @@ void Code::writePushPop(Parser::CommandType command, const std::string &segment,
         break;
     }
     }
-    output << "@15\nM=D\n";
+    output << "@R15\nM=D\n";
 
     if (command == Parser::CommandType::C_Push)
     {
