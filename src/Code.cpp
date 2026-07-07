@@ -76,30 +76,30 @@ void Code::writeCompLabel(const std::string &jump)
 
     output << "(END_COMP" << labelCount << ")\n";
 }
-void Code::writeLabel(const std::string &label, const std::string &functionName)
+void Code::writeLabel(const std::string &label)
 {
-    output << "(" << currentFileName << "." << functionName << "$" << label
+    output << "(" << currentFileName << "." << currentFunction << "$" << label
            << ")\n";
 }
 
-void Code::writeGoTo(const std::string &label, const std::string &functionName)
+void Code::writeGoTo(const std::string &label)
 {
-    output << "@" << currentFileName << "." << functionName << "$" << label
+    output << "@" << currentFileName << "." << currentFunction << "$" << label
            << "\n";
     output << "0;JMP\n";
 }
 
-void Code::writeIf(const std::string &label, const std::string &functionName)
+void Code::writeIf(const std::string &label)
 {
     popToD();
-    output << "@" << currentFileName << "." << functionName << "$" << label
+    output << "@" << currentFileName << "." << currentFunction << "$" << label
            << "\n";
     output << "D;JLT\n";
 }
 
-void Code::writeFunction(const std::string &functionName, int nVariables)
+void Code::writeFunction(int nVariables)
 {
-    output << "(" << currentFileName << "." << functionName << ")\n";
+    output << "(" << currentFileName << "." << currentFunction << ")\n";
 
     for (int i = 0; i < nVariables; i++)
     {
@@ -107,25 +107,25 @@ void Code::writeFunction(const std::string &functionName, int nVariables)
     }
 }
 
-void Code::writeCall(const std::string &functionName, const int &nArgs)
+void Code::writeCall(const int &nArgs)
 {
     std::string labelName;
     std::string jumpTarget;
 
     // 1. Determine the scopes
-    if (functionName.find('.') != std::string::npos)
+    if (currentFunction.find('.') != std::string::npos)
     {
         // If the function name already has a dot (like "Sys.init" or
         // "Math.multiply")
-        jumpTarget = functionName;
-        labelName = functionName + "$ret." + std::to_string(ret_add++);
+        jumpTarget = currentFunction;
+        labelName = currentFunction + "$ret." + std::to_string(ret_add++);
     }
     else
     {
         // Standard call within the current file (like calling local function
         // "foo")
-        jumpTarget = currentFileName + "." + functionName;
-        labelName = currentFileName + "." + functionName + "$ret." +
+        jumpTarget = currentFileName + "." + currentFunction;
+        labelName = currentFileName + "." + currentFunction + "$ret." +
                     std::to_string(ret_add++);
     }
     //---------save return address first
@@ -255,7 +255,8 @@ Code::Code(const std::filesystem::path &outpath)
 void Code::init()
 {
     output << "@256\nD=A\n@SP\nM=D\n";
-    writeCall("Sys.init", 0);
+    currentFunction = "Sys.init";
+    writeCall(0);
 }
 
 void Code::writeArithmetic(const std::string &command)
@@ -406,6 +407,12 @@ void Code::writePushPop(Parser::CommandType command, const std::string &segment,
 void Code::updateFileName(const std::string &fileName)
 {
     currentFileName = fileName;
+    return;
+}
+
+void Code::updateFunctionName(const std::string &functionName)
+{
+    currentFunction = functionName;
     return;
 }
 void Code::close()

@@ -84,8 +84,8 @@ TEST_F(CodeTest, writeLabelsUnderFunctions)
 {
     std::string segment = "label bar";
     writer.updateFileName("TestOutput");
-
-    writer.writeLabel("bar", "foo");
+    writer.updateFunctionName("foo");
+    writer.writeLabel("bar");
 
     writer.close();
 
@@ -97,9 +97,10 @@ TEST_F(CodeTest, writeLabelsUnderFunctions)
 TEST_F(CodeTest, writeGoTo_IfGOTO)
 {
     writer.updateFileName("TestOutput");
-    writer.writeGoTo("bar", "foo");
+    writer.updateFunctionName("foo");
+    writer.writeGoTo("bar");
 
-    writer.writeIf("bar", "foo");
+    writer.writeIf("bar");
 
     writer.close();
     std::string expectedAssembly = "@TestOutput.foo$bar\n"
@@ -128,7 +129,8 @@ TEST_F(CodeTest, writeFunctionTest)
 TEST_F(CodeTest, writeCallTest)
 {
 
-    writer.writeCall("bar", 2);
+    writer.updateFunctionName("foo");
+    writer.writeCall(2);
     writer.close();
 
     std::cout << "\n--- Generated Assembly Output ---\n"
@@ -137,8 +139,8 @@ TEST_F(CodeTest, writeCallTest)
 }
 TEST_F(CodeTest, writeSysCallTest)
 {
-
-    writer.writeCall("Sys.init", 0);
+    writer.updateFunctionName("Sys.init");
+    writer.writeCall(0);
     writer.close();
 
     std::cout << "\n--- Generated Assembly Output ---\n"
@@ -149,7 +151,8 @@ TEST_F(CodeTest, writeSysCallTest)
 TEST_F(CodeTest, writeFullTest)
 {
     writer.init();
-    writer.writeCall("Foo", 2);
+    writer.updateFunctionName("foo");
+    writer.writeCall(2);
     writer.writeReturn();
     writer.close();
 
