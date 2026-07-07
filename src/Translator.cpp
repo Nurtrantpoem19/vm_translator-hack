@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     }
 
     std::filesystem::path inPath = {argv[1]};
+
     if (!std::filesystem::exists(inPath))
     {
         std::cerr << "Error: The system cannot find the path specified:\n"
@@ -21,19 +22,50 @@ int main(int argc, char *argv[])
                   << "\n";
         return 1;
     }
+    if (!std::filesystem::is_directory(inPath))
+    {
+        std::cerr << "Error, need directory as input\n";
+        return 1;
+    }
 
-    std::filesystem::path outPath = inPath;
+    std::filesystem::path dirName = inPath.filename();
+    if (dirName.empty())
+    {
+        dirName = inPath.parent_path().filename();
+    }
+
+    std::filesystem::path outPath = inPath / dirName;
     outPath.replace_extension(".hack");
-    std::cout << "Translating: " << inPath.filename() << " -> "
-              << outPath.filename() << "\n";
+
+    std::cout << "Translating: " << dirName.string() << " -> "
+              << outPath.filename().string() << "\n";
 
     Code writer(outPath);
-    writer.init();
+
+    bool initialize = true;
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+
+        if (arg == "-no-init" || arg == "--no-init")
+        {
+            initialize = false;
+        }
+    }
+    if (initialize)
+    {
+        writer.init();
+    }
+
     int lineCount = 0;
     for (auto &it : std::filesystem::directory_iterator(inPath))
     {
+        if (it.path().extension() != ".vm")
+        {
+            continue;
+        }
         Parser reader(it.path());
-
+        writer.updateFileName(it.path().filename().string());
         while (reader.advance())
         {
             ++lineCount;
@@ -52,23 +84,24 @@ int main(int argc, char *argv[])
                 }
                 else if (type == Parser::CommandType::C_Function)
                 {
-                    writer.writeFunction(reader.arg1(), reader.arg2());
+                    writer.updateFunctionName(reader.arg1());
+                    writer.writeFunction(reader.arg2());
                 }
                 else if (type == Parser::CommandType::C_Call)
                 {
-                    writer.writeCall(reader.arg1(), reader.arg2());
+                    writer.writeCall(reader.arg2());
                 }
                 else if (type == Parser::CommandType::C_Goto)
                 {
-                    writer.writeGoTo(reader.arg1(), reader.getFunctionName());
+                    writer.writeGoTo(reader.arg1());
                 }
                 else if (type == Parser::CommandType::C_If)
                 {
-                    writer.writeIf(reader.arg1(), reader.getFunctionName());
+                    writer.writeIf(reader.arg1());
                 }
                 else if (type == Parser::CommandType::C_Label)
                 {
-                    writer.writeLabel(reader.arg1(), reader.getFunctionName());
+                    writer.writeLabel(reader.arg1());
                 }
                 else if (type == Parser::CommandType::C_Return)
                 {
