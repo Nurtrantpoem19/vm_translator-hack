@@ -117,13 +117,16 @@ TEST_F(CodeTest, writeGoTo_IfGOTO)
 
 TEST_F(CodeTest, writeFunctionTest)
 {
-    //
-    // writer.writeFunction("foo", 2);
-    // writer.close();
-    //
-    // std::cout << "\n--- Generated Assembly Output ---\n"
-    //           << getOutputFileContent()
-    //           << "---------------------------------\n";
+    writer.updateFunctionName("foo");
+
+    writer.writeFunction(2);
+    writer.close();
+
+    std::string output = getOutputFileContent();
+
+    EXPECT_NE(output.find("(foo)\n"), std::string::npos);
+
+    EXPECT_FALSE(output.empty());
 }
 
 TEST_F(CodeTest, writeCallTest)
@@ -175,4 +178,66 @@ TEST_F(CodeTest, testSysInitFunction)
     writer.close();
 
     std::string expected = "";
+}
+
+TEST_F(CodeTest, GeneratesCorrectCallSequence)
+{
+    writer.updateFunctionName("Main.fibonacci");
+    writer.updateCalleeName("Math.multiply");
+
+    writer.writeCall(2);
+    writer.close();
+
+    std::string expectedAssembly = "@Main.fibonacci$ret.0\n"
+                                   "D=A\n"
+                                   "@SP\n"
+                                   "A=M\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "M=M+1\n"
+                                   "@LCL\n"
+                                   "D=M\n"
+                                   "@SP\n"
+                                   "A=M\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "M=M+1\n"
+                                   "@ARG\n"
+                                   "D=M\n"
+                                   "@SP\n"
+                                   "A=M\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "M=M+1\n"
+                                   "@THIS\n"
+                                   "D=M\n"
+                                   "@SP\n"
+                                   "A=M\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "M=M+1\n"
+                                   "@THAT\n"
+                                   "D=M\n"
+                                   "@SP\n"
+                                   "A=M\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "M=M+1\n"
+                                   "@SP\n"
+                                   "D=M\n"
+                                   "@5\n"
+                                   "D=D-A\n"
+                                   "@2\n"
+                                   "D=D-A\n"
+                                   "@ARG\n"
+                                   "M=D\n"
+                                   "@SP\n"
+                                   "D=M\n"
+                                   "@LCL\n"
+                                   "M=D\n"
+                                   "@Math.multiply\n"
+                                   "0;JMP\n"
+                                   "(Main.fibonacci$ret.0)\n";
+
+    EXPECT_EQ(getOutputFileContent(), expectedAssembly);
 }
