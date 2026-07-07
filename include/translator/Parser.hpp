@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 class Parser
 {
   private:
@@ -12,6 +13,7 @@ class Parser
     std::size_t firstSpace;
     std::size_t secondSpace;
     std::string currentFunction;
+    std::vector<std::string> tokens;
 
   public:
     enum class CommandType
