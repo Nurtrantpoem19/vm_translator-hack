@@ -5,7 +5,7 @@
 #include <vector>
 
 Parser::Parser(const std::filesystem::path &input)
-    : reader(input), currentCommand(""), currentFunction(""),
+    : reader(input), currentCommand(""),
       lookup{{"push", CommandType::C_Push},
              {"pop", CommandType::C_Pop},
              {"label", CommandType::C_Label},
@@ -51,7 +51,7 @@ std::string Parser::arg1()
 {
     if (commandType() == CommandType::C_Arithmetic)
     {
-        return currentCommand;
+        return tokens[0];
     }
     return tokens[1];
 }
@@ -69,4 +69,4 @@ Parser::CommandType Parser::commandType()
     return CommandType::C_Arithmetic;
 }
 
-std::string Parser::getFunctionName() { return currentFunction; }
+// std::string Parser::getFunctionName() { return tokens[1]; }

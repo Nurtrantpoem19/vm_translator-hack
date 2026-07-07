@@ -12,7 +12,6 @@ class Parser
     std::string currentCommand;
     std::size_t firstSpace;
     std::size_t secondSpace;
-    std::string currentFunction;
     std::vector<std::string> tokens;
 
   public:
@@ -35,7 +34,6 @@ class Parser
     CommandType commandType();
     std::string arg1();
     int arg2();
-    std::string getFunctionName();
 };
 
 #endif
