@@ -99,7 +99,7 @@ void Code::writeIf(const std::string &label)
 
 void Code::writeFunction(int nVariables)
 {
-    output << "(" << currentFileName << "." << currentFunction << ")\n";
+    output << "(" << currentFunction << ")\n";
 
     for (int i = 0; i < nVariables; i++)
     {
@@ -112,22 +112,9 @@ void Code::writeCall(const int &nArgs)
     std::string labelName;
     std::string jumpTarget;
 
-    // 1. Determine the scopes
-    if (currentFunction.find('.') != std::string::npos)
-    {
-        // If the function name already has a dot (like "Sys.init" or
-        // "Math.multiply")
-        jumpTarget = currentFunction;
-        labelName = currentFunction + "$ret." + std::to_string(ret_add++);
-    }
-    else
-    {
-        // Standard call within the current file (like calling local function
-        // "foo")
-        jumpTarget = currentFileName + "." + currentFunction;
-        labelName = currentFileName + "." + currentFunction + "$ret." +
-                    std::to_string(ret_add++);
-    }
+    jumpTarget = currentFunction;
+    labelName = currentFunction + "$ret." + std::to_string(ret_add++);
+
     //---------save return address first
     output << "@" << labelName << "\n"
            << "D=A\n"
