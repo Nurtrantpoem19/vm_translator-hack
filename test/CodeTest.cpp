@@ -45,7 +45,7 @@ TEST_F(CodeTest, PushConstantSeven)
     // 2. Define the theoretical output
     std::string expectedAssembly = "@7\n"
                                    "D=A\n"
-                                   "@15\n"
+                                   "@R15\n"
                                    "M=D\n"
                                    "@R15\n"
                                    "D=M\n"
@@ -109,7 +109,7 @@ TEST_F(CodeTest, writeGoTo_IfGOTO)
                                    "AM=M-1\n"
                                    "D=M\n"
                                    "@TestOutput.foo$bar\n"
-                                   "D;JLT\n";
+                                   "D;JNE\n";
 
     // Read the file and assert
     EXPECT_EQ(getOutputFileContent(), expectedAssembly);
@@ -159,4 +159,20 @@ TEST_F(CodeTest, writeFullTest)
     std::cout << "\n--- Generated Assembly Output ---\n"
               << getOutputFileContent()
               << "---------------------------------\n";
+}
+
+TEST_F(CodeTest, testSysInitFunction)
+{
+
+    writer.init();
+    writer.updateFunctionName("Sys.init");
+    writer.writeFunction(0);
+
+    std::cout << "\n--- Generated Assembly Output ---\n"
+              << getOutputFileContent()
+              << "---------------------------------\n";
+
+    writer.close();
+
+    std::string expected = "";
 }
