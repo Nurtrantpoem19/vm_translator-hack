@@ -1,8 +1,10 @@
 #include "translator/Parser.hpp"
+#include <sstream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
-Parser::Parser(std::filesystem::path &input)
+Parser::Parser(const std::filesystem::path &input)
     : reader(input), currentCommand(""),
       lookup{{"push", CommandType::C_Push},
              {"pop", CommandType::C_Pop},
@@ -10,7 +12,8 @@ Parser::Parser(std::filesystem::path &input)
              {"goto", CommandType::C_Goto},
              {"function", CommandType::C_Function},
              {"return", CommandType::C_Return},
-             {"constant", CommandType::C_Call}}
+             {"call", CommandType::C_Call},
+             {"if-goto", CommandType::C_If}}
 
 {
 }
@@ -19,6 +22,7 @@ bool Parser::advance()
 {
     while (std::getline(reader, currentCommand))
     {
+        tokens.clear();
 
         std::size_t slash = currentCommand.find("//");
         if (slash != std::string::npos)
@@ -26,23 +30,19 @@ bool Parser::advance()
             currentCommand = currentCommand.substr(0, slash);
         }
 
-        if (!currentCommand.empty())
+        std::istringstream line(currentCommand);
+        std::string token;
+
+        while (tokens.size() < 3 && line >> token)
         {
-            if (currentCommand.find_first_not_of(" \t\r\n") ==
-                std::string::npos)
-            {
-                continue;
-            }
-            else
-            {
-
-                firstSpace = currentCommand.find(' ');
-
-                secondSpace = currentCommand.find(' ', firstSpace + 1);
-
-                return true;
-            }
+            tokens.push_back(token);
         }
+        if (tokens.empty())
+        {
+
+            continue;
+        }
+        return true;
     }
     return false;
 }
@@ -51,19 +51,22 @@ std::string Parser::arg1()
 {
     if (commandType() == CommandType::C_Arithmetic)
     {
-        return currentCommand;
+        return tokens[0];
     }
-    return currentCommand.substr(firstSpace + 1, secondSpace - firstSpace - 1);
+    return tokens[1];
 }
 
-int Parser::arg2() { return std::stoi(currentCommand.substr(secondSpace + 1)); }
+int Parser::arg2() { return std::stoi(tokens[2]); }
 
 Parser::CommandType Parser::commandType()
 {
-    auto it = lookup.find(currentCommand.substr(0, firstSpace));
+    auto it = lookup.find(tokens[0]);
     if (it != lookup.end())
     {
+
         return it->second;
     }
     return CommandType::C_Arithmetic;
 }
+
+// std::string Parser::getFunctionName() { return tokens[1]; }

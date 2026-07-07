@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 class Parser
 {
   private:
@@ -11,6 +12,7 @@ class Parser
     std::string currentCommand;
     std::size_t firstSpace;
     std::size_t secondSpace;
+    std::vector<std::string> tokens;
 
   public:
     enum class CommandType
@@ -22,10 +24,11 @@ class Parser
         C_Goto,
         C_Function,
         C_Return,
+        C_If,
         C_Call
     };
 
-    Parser(std::filesystem::path &input);
+    Parser(const std::filesystem::path &input);
     std::unordered_map<std::string, CommandType> lookup;
     bool advance();
     CommandType commandType();
