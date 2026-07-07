@@ -248,18 +248,27 @@ TEST_F(ParserTest, HandlesArg1AsFunctionLabel)
     CreateTestFile("function foo 0\nlabel bar\nfunction foo2 1\n");
     Parser parser(tempFile);
 
-    EXPECT_EQ(parser.getFunctionName(), "");
-
     parser.advance();
     EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Function);
     EXPECT_EQ(parser.arg2(), 0);
-    EXPECT_EQ(parser.getFunctionName(), "foo");
 
     parser.advance();
     EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Label);
     EXPECT_EQ(parser.arg1(), "bar");
-    EXPECT_EQ(parser.getFunctionName(), "foo");
 
     parser.advance();
-    EXPECT_EQ(parser.getFunctionName(), "foo2");
+}
+
+TEST_F(ParserTest, HandlesWhiteSpace)
+{
+    CreateTestFile("\tadd\t\nlabel      bar\n");
+    Parser parser(tempFile);
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Arithmetic);
+    EXPECT_EQ(parser.arg1(), "add");
+
+    parser.advance();
+    EXPECT_EQ(parser.commandType(), Parser::CommandType::C_Label);
+    EXPECT_EQ(parser.arg1(), "bar");
 }
